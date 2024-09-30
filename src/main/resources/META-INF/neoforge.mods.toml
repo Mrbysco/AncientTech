@@ -1,0 +1,26 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+issueTrackerURL="https://github.com/Mrbysco/AncientTech/issues"
+license="MIT"
+
+[[mods]]
+modId="ancienttech"
+version="${file.jarVersion}"
+displayName="Ancient Tech"
+displayURL="https://www.curseforge.com/minecraft/mc-mods/AncientTech"
+authors="Mrbysco, ShyNieke"
+description='''
+Technology from the past, in the present.
+'''
+[[dependencies.ancienttech]]
+modId="minecraft"
+type="required"
+versionRange="[1.21,1.22)"
+ordering="NONE"
+side="BOTH"
+[[dependencies.ancienttech]]
+modId="neoforge"
+type="required"
+versionRange="[21.1.1,)"
+ordering="NONE"
+side="BOTH"

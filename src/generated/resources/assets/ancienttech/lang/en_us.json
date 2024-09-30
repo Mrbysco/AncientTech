@@ -1,0 +1,9 @@
+{
+  "ancienttech.fake_player": "Ancient Fake Player",
+  "block.ancienttech.disco_generator": "Disco Generator",
+  "block.ancienttech.hurt_generator": "Hurt Generator",
+  "block.ancienttech.pain_generator": "Pain Generator",
+  "block.ancienttech.sculk_generator": "Sculk Generator",
+  "block.ancienttech.sculkier_generator": "Sculkier Generator",
+  "itemGroup.ancienttech": "Ancient Tech"
+}
