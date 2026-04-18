@@ -8,7 +8,7 @@ Technology from the past, in the present. This mod adds a bunch of Sculk related
 
 ## License ##
 * Ancient Tech is licensed under the MIT License
-  - (c) 2025 Mrbysco
+  - (c) 2026 Mrbysco
   - [![License](https://img.shields.io/badge/License-MIT-red.svg?style=flat)](http://opensource.org/licenses/MIT)
 
 ## Downloads ##
