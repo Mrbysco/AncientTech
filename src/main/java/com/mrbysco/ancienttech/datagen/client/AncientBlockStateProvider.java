@@ -2,35 +2,65 @@ package com.mrbysco.ancienttech.datagen.client;
 
 import com.mrbysco.ancienttech.AncientTech;
 import com.mrbysco.ancienttech.registry.AncientRegistry;
+import net.minecraft.client.data.models.BlockModelGenerators;
+import net.minecraft.client.data.models.ItemModelGenerators;
+import net.minecraft.client.data.models.ModelProvider;
+import net.minecraft.client.data.models.model.ModelTemplates;
+import net.minecraft.client.data.models.model.TextureMapping;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.data.PackOutput;
-import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
-import net.neoforged.neoforge.client.model.generators.ConfiguredModel;
-import net.neoforged.neoforge.client.model.generators.ModelFile;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import net.minecraft.resources.Identifier;
 
-public class AncientBlockStateProvider extends BlockStateProvider {
-	public AncientBlockStateProvider(PackOutput output, ExistingFileHelper fileHelper) {
-		super(output, AncientTech.MOD_ID, fileHelper);
+public class AncientBlockStateProvider extends ModelProvider {
+	public AncientBlockStateProvider(PackOutput output) {
+		super(output, AncientTech.MOD_ID);
 	}
 
 	@Override
-	protected void registerStatesAndModels() {
-		ModelFile sculkModel = models().getExistingFile(modLoc("block/sculk_generator"));
-		getVariantBuilder(AncientRegistry.SCULK_GENERATOR.get()).forAllStates(state -> ConfiguredModel.builder().modelFile(sculkModel).build());
-		itemModels().withExistingParent(AncientRegistry.SCULK_GENERATOR.getId().getPath(), modLoc("block/sculk_generator"));
+	protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
+		// Sculk Generators
+		Identifier sculkModelId = Identifier.fromNamespaceAndPath(AncientTech.MOD_ID, "block/sculk_generator");
+		blockModels.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(
+				AncientRegistry.SCULK_GENERATOR.get(),
+				BlockModelGenerators.plainVariant(sculkModelId)
+		));
+		blockModels.registerSimpleItemModel(AncientRegistry.SCULK_GENERATOR.get(), sculkModelId);
 
-		getVariantBuilder(AncientRegistry.SCULKIER_GENERATOR.get()).forAllStates(state -> ConfiguredModel.builder().modelFile(sculkModel).build());
-		itemModels().withExistingParent(AncientRegistry.SCULKIER_GENERATOR.getId().getPath(), modLoc("block/sculk_generator"));
+		blockModels.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(
+				AncientRegistry.SCULKIER_GENERATOR.get(),
+				BlockModelGenerators.plainVariant(sculkModelId)
+		));
+		blockModels.registerSimpleItemModel(AncientRegistry.SCULKIER_GENERATOR.get(), sculkModelId);
 
-		ModelFile model3 = models().cubeAll(AncientRegistry.DISCO_GENERATOR.getId().getPath(), mcLoc("block/jukebox_side"));
-		getVariantBuilder(AncientRegistry.DISCO_GENERATOR.get()).forAllStates(state -> ConfiguredModel.builder().modelFile(model3).build());
-		itemModels().withExistingParent(AncientRegistry.DISCO_GENERATOR.getId().getPath(), modLoc("block/" + AncientRegistry.DISCO_GENERATOR.getId().getPath()));
+		// Disco Generator
+		Identifier discoModelId = ModelTemplates.CUBE_ALL.create(
+				AncientRegistry.DISCO_GENERATOR.get(),
+				TextureMapping.cube(new Material(Identifier.withDefaultNamespace("block/jukebox_side"))),
+				blockModels.modelOutput
+		);
+		blockModels.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(
+				AncientRegistry.DISCO_GENERATOR.get(),
+				BlockModelGenerators.plainVariant(discoModelId)
+		));
+		blockModels.registerSimpleItemModel(AncientRegistry.DISCO_GENERATOR.get(), discoModelId);
 
-		ModelFile hurtModel = models().cubeAll(AncientRegistry.HURT_GENERATOR.getId().getPath(), mcLoc("block/target_side"));
-		getVariantBuilder(AncientRegistry.HURT_GENERATOR.get()).forAllStates(state -> ConfiguredModel.builder().modelFile(hurtModel).build());
-		itemModels().withExistingParent(AncientRegistry.HURT_GENERATOR.getId().getPath(), modLoc("block/hurt_generator"));
+		// Hurt Generator
+		Identifier hurtModelId = ModelTemplates.CUBE_ALL.create(
+				AncientRegistry.HURT_GENERATOR.get(),
+				TextureMapping.cube(new Material(Identifier.withDefaultNamespace("block/target_side"))),
+				blockModels.modelOutput
+		);
+		blockModels.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(
+				AncientRegistry.HURT_GENERATOR.get(),
+				BlockModelGenerators.plainVariant(hurtModelId)
+		));
+		blockModels.registerSimpleItemModel(AncientRegistry.HURT_GENERATOR.get(), hurtModelId);
 
-		getVariantBuilder(AncientRegistry.PAIN_GENERATOR.get()).forAllStates(state -> ConfiguredModel.builder().modelFile(hurtModel).build());
-		itemModels().withExistingParent(AncientRegistry.PAIN_GENERATOR.getId().getPath(), modLoc("block/hurt_generator"));
+		// Pain Generator reuses Hurt Generator's generated model
+		blockModels.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(
+				AncientRegistry.PAIN_GENERATOR.get(),
+				BlockModelGenerators.plainVariant(hurtModelId)
+		));
+		blockModels.registerSimpleItemModel(AncientRegistry.PAIN_GENERATOR.get(), hurtModelId);
 	}
 }

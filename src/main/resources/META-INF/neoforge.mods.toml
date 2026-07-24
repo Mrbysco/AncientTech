@@ -15,12 +15,12 @@ Technology from the past, in the present.
 [[dependencies.ancienttech]]
 modId="minecraft"
 type="required"
-versionRange="[1.21,1.22)"
+versionRange="[26.1.1,)"
 ordering="NONE"
 side="BOTH"
 [[dependencies.ancienttech]]
 modId="neoforge"
 type="required"
-versionRange="[21.1.1,)"
+versionRange="[26.1.1.0-alpha,)"
 ordering="NONE"
 side="BOTH"

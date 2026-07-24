@@ -6,18 +6,19 @@ import com.mrbysco.ancienttech.blocks.PainGeneratorBlock;
 import com.mrbysco.ancienttech.blocks.SculkGeneratorBlock;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -26,15 +27,15 @@ public class AncientRegistry {
 	public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(AncientTech.MOD_ID);
 	public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, AncientTech.MOD_ID);
 
-	public static final DeferredBlock<SculkGeneratorBlock> SCULK_GENERATOR = registerBlockWithItem("sculk_generator", () -> new SculkGeneratorBlock(blockBuilder()), blockItemBuilder());
-	public static final DeferredBlock<SculkGeneratorBlock> SCULKIER_GENERATOR = registerBlockWithItem("sculkier_generator", () -> new SculkGeneratorBlock(blockBuilder()), blockItemBuilder());
-	public static final DeferredBlock<DiscoGeneratorBlock> DISCO_GENERATOR = registerBlockWithItem("disco_generator", () -> new DiscoGeneratorBlock(blockBuilder()), blockItemBuilder());
-	public static final DeferredBlock<PainGeneratorBlock> HURT_GENERATOR = registerBlockWithItem("hurt_generator", () -> new PainGeneratorBlock(blockBuilder()), blockItemBuilder());
-	public static final DeferredBlock<PainGeneratorBlock> PAIN_GENERATOR = registerBlockWithItem("pain_generator", () -> new PainGeneratorBlock(blockBuilder()), blockItemBuilder());
+	public static final DeferredBlock<SculkGeneratorBlock> SCULK_GENERATOR = registerBlockWithItem("sculk_generator", SculkGeneratorBlock::new, AncientRegistry::blockBuilder, AncientRegistry::blockItemBuilder);
+	public static final DeferredBlock<SculkGeneratorBlock> SCULKIER_GENERATOR = registerBlockWithItem("sculkier_generator", SculkGeneratorBlock::new, AncientRegistry::blockBuilder, AncientRegistry::blockItemBuilder);
+	public static final DeferredBlock<DiscoGeneratorBlock> DISCO_GENERATOR = registerBlockWithItem("disco_generator", DiscoGeneratorBlock::new, AncientRegistry::blockBuilder, AncientRegistry::blockItemBuilder);
+	public static final DeferredBlock<PainGeneratorBlock> HURT_GENERATOR = registerBlockWithItem("hurt_generator", PainGeneratorBlock::new, AncientRegistry::blockBuilder, AncientRegistry::blockItemBuilder);
+	public static final DeferredBlock<PainGeneratorBlock> PAIN_GENERATOR = registerBlockWithItem("pain_generator", PainGeneratorBlock::new, AncientRegistry::blockBuilder, AncientRegistry::blockItemBuilder);
 
-	public static <B extends Block> DeferredBlock<B> registerBlockWithItem(String name, Supplier<? extends B> supplier, Item.Properties properties) {
-		DeferredBlock<B> block = AncientRegistry.BLOCKS.register(name, supplier);
-		ITEMS.register(name, () -> new BlockItem(block.get(), properties));
+	public static <B extends Block> DeferredBlock<B> registerBlockWithItem(String name, Function<BlockBehaviour.Properties, ? extends B> supplier, Supplier<BlockBehaviour.Properties> blockProperties, Supplier<Item.Properties> itemProperties) {
+		DeferredBlock<B> block = AncientRegistry.BLOCKS.registerBlock(name, supplier, blockProperties);
+		ITEMS.registerSimpleBlockItem(block, itemProperties);
 		return block;
 	}
 

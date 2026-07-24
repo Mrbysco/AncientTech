@@ -39,7 +39,7 @@ public class DiscoGeneratorBlock extends BaseEntityBlock {
 
 	@Nullable
 	protected static <T extends BlockEntity> BlockEntityTicker<T> createDiscoTicker(Level level, BlockEntityType<T> blockEntityType, BlockEntityType<? extends DiscoGeneratorBlockEntity> blockEntityType1) {
-		return level.isClientSide ? null : createTickerHelper(blockEntityType, blockEntityType1, DiscoGeneratorBlockEntity::serverTick);
+		return level.isClientSide() ? null : createTickerHelper(blockEntityType, blockEntityType1, DiscoGeneratorBlockEntity::serverTick);
 	}
 
 	@Override

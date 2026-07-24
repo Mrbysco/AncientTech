@@ -8,11 +8,7 @@ import com.mrbysco.ancienttech.registry.AncientRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.data.registries.VanillaRegistries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.Connection;
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
@@ -25,16 +21,20 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.vibrations.VibrationSystem;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.registries.datamaps.builtin.NeoForgeDataMaps;
+import net.neoforged.neoforge.transfer.energy.EnergyHandler;
+import net.neoforged.neoforge.transfer.energy.SimpleEnergyHandler;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
 //TODO: Make the hardcoded values like max storage and generation multiplier configurable
 public class PainGeneratorBlockEntity extends VibrationBasedBlockEntity implements PowerStoring {
-	public final EditableEnergyStorage storage;
+	public final SimpleEnergyHandler storage;
 	private final AABB aabb;
 	private UUID placer = null;
 
@@ -54,23 +54,23 @@ public class PainGeneratorBlockEntity extends VibrationBasedBlockEntity implemen
 			AncientFakePlayer.useFakePlayer((ServerLevel) level, blockEntity.placer, (fakePlayer -> {
 				DamageSource source = level.damageSources().playerAttack(fakePlayer);
 				level.getEntitiesOfClass(LivingEntity.class, blockEntity.aabb, entity -> entity.isAlive() &&
-						!entity.isInvulnerableTo(source)).forEach(entity -> {
+						!entity.isInvulnerableTo((ServerLevel) level, source)).forEach(entity -> {
 					ItemStack tempSword = new ItemStack(Items.WOODEN_SWORD, 1);
 					fakePlayer.setItemInHand(InteractionHand.MAIN_HAND, tempSword);
 					entity.hurt(source, entity.getMaxHealth());
 				});
-				blockEntity.storage.setEnergyStored(0);
+				blockEntity.storage.set(0);
 				return true;
 			}));
 		}
 	}
 
 	private boolean canKillEntities() {
-		return aabb != null && storage.getEnergyStored() == storage.getMaxEnergyStored();
+		return aabb != null && storage.getAmountAsInt() == storage.getCapacityAsLong();
 	}
 
 	@Override
-	public IEnergyStorage getEnergyStorage(Direction facing) {
+	public EnergyHandler getEnergyStorage(Direction facing) {
 		return this.storage;
 	}
 
@@ -94,10 +94,14 @@ public class PainGeneratorBlockEntity extends VibrationBasedBlockEntity implemen
 	public void onReceiveVibration(ServerLevel serverLevel, BlockPos pos, Holder<GameEvent> gameEvent, @Nullable Entity entity, @Nullable Entity playerEntity, float distance) {
 		this.setLastVibrationFrequency(VibrationSystem.getGameEventFrequency(gameEvent));
 
-		if (this.storage.getEnergyStored() < this.storage.getMaxEnergyStored()) {
+		if (this.storage.getAmountAsInt() < this.storage.getCapacityAsLong()) {
 			int frequency = gameEvent.getData(NeoForgeDataMaps.VIBRATION_FREQUENCIES).frequency();
 			int generating = 5 * (Math.round((float) (frequency * 4) / 5));
-			this.storage.receiveEnergy(generating, false);
+			try (var tx = Transaction.openRoot()) {
+				if (this.storage.insert(generating, tx) == generating) {
+					tx.commit();
+				}
+			}
 			this.setChanged();
 			BlockState state = level.getBlockState(worldPosition);
 			level.sendBlockUpdated(worldPosition, state, state, 2);
@@ -105,55 +109,25 @@ public class PainGeneratorBlockEntity extends VibrationBasedBlockEntity implemen
 	}
 
 	@Override
-	protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-		super.loadAdditional(tag, registries);
+	protected void loadAdditional(ValueInput input) {
+		super.loadAdditional(input);
 
-		if (tag.contains("energy"))
-			this.storage.deserializeNBT(registries, tag.get("energy"));
+		this.storage.deserialize(input.childOrEmpty("energy"));
 
-		placer = tag.hasUUID("placer") ? tag.getUUID("placer") : null;
+		placer = input.read("placer", UUIDUtil.CODEC).orElse(null);
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-		super.saveAdditional(tag, registries);
+	protected void saveAdditional(ValueOutput output) {
+		super.saveAdditional(output);
 
-		tag.put("energy", this.storage.serializeNBT(registries));
+		this.storage.serialize(output.child("energy"));
 
-		if (placer != null) tag.putUUID("placer", placer);
+		if (placer != null)
+			output.store("placer", UUIDUtil.CODEC, placer);
 	}
 
 	public void setPlacer(Player player) {
 		placer = player.getUUID();
-	}
-
-	@Override
-	public ClientboundBlockEntityDataPacket getUpdatePacket() {
-		return ClientboundBlockEntityDataPacket.create(this);
-	}
-
-	@Override
-	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider lookupProvider) {
-		CompoundTag compoundNBT = pkt.getTag();
-		handleUpdateTag(compoundNBT, lookupProvider);
-	}
-
-	@Override
-	public CompoundTag getUpdateTag(HolderLookup.Provider lookupProvider) {
-		CompoundTag nbt = new CompoundTag();
-		this.saveAdditional(nbt, lookupProvider);
-		return nbt;
-	}
-
-	@Override
-	public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider lookupProvider) {
-		super.handleUpdateTag(tag, lookupProvider);
-	}
-
-	@Override
-	public CompoundTag getPersistentData() {
-		CompoundTag nbt = new CompoundTag();
-		this.saveAdditional(nbt, level != null ? level.registryAccess() : VanillaRegistries.createLookup());
-		return nbt;
 	}
 }

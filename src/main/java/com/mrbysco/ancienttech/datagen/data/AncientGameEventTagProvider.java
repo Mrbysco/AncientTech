@@ -6,15 +6,12 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.GameEventTagsProvider;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
 
 public class AncientGameEventTagProvider extends GameEventTagsProvider {
-	public AncientGameEventTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> completableFuture,
-	                                   @Nullable ExistingFileHelper fileHelper) {
-		super(output, completableFuture, AncientTech.MOD_ID, fileHelper);
+	public AncientGameEventTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> completableFuture) {
+		super(output, completableFuture, AncientTech.MOD_ID);
 	}
 
 	@Override

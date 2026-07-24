@@ -35,7 +35,7 @@ public class SculkGeneratorBlock extends BaseEntityBlock {
 	@Nullable
 	@Override
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType) {
-		return level.isClientSide ? null : createTickerHelper(
+		return level.isClientSide() ? null : createTickerHelper(
 				blockEntityType, AncientBlockEntities.SCULK_GENERATOR_BLOCK_ENTITY.get(),
 				(blockLevel, blockPos, blockState, blockEntity) -> VibrationSystem.Ticker.tick(
 						blockLevel, blockEntity.getVibrationData(), blockEntity.getVibrationUser()
@@ -44,7 +44,7 @@ public class SculkGeneratorBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public RenderShape getRenderShape(BlockState pState) {
+	public RenderShape getRenderShape(BlockState state) {
 		return RenderShape.MODEL;
 	}
 }
