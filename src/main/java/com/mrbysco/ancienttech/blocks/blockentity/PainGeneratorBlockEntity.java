@@ -49,6 +49,7 @@ public class PainGeneratorBlockEntity extends VibrationBasedBlockEntity implemen
 	}
 
 	//
+	@SuppressWarnings("deprecation")
 	public static void serverTick(Level level, BlockPos pos, BlockState state, PainGeneratorBlockEntity blockEntity) {
 		if (level.getGameTime() % 20 == 0 && level.hasNeighborSignal(pos) && blockEntity.hurtsEntities() && blockEntity.canKillEntities()) {
 			AncientFakePlayer.useFakePlayer((ServerLevel) level, blockEntity.placer, (fakePlayer -> {

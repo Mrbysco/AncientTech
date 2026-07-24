@@ -41,6 +41,7 @@ public class AncientFakePlayer extends FakePlayer {
 		return result;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public boolean canBeAffected(MobEffectInstance mobEffectInstance) {
 		return false;
