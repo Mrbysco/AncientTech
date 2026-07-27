@@ -51,23 +51,26 @@ public class PainGeneratorBlockEntity extends VibrationBasedBlockEntity implemen
 	//
 	@SuppressWarnings("deprecation")
 	public static void serverTick(Level level, BlockPos pos, BlockState state, PainGeneratorBlockEntity blockEntity) {
-		if (level.getGameTime() % 20 == 0 && level.hasNeighborSignal(pos) && blockEntity.hurtsEntities() && blockEntity.canKillEntities()) {
+		if (level.getGameTime() % 20 == 0 && level.hasNeighborSignal(pos) && blockEntity.canKillEntities()) {
 			AncientFakePlayer.useFakePlayer((ServerLevel) level, blockEntity.placer, (fakePlayer -> {
 				DamageSource source = level.damageSources().playerAttack(fakePlayer);
 				level.getEntitiesOfClass(LivingEntity.class, blockEntity.aabb, entity -> entity.isAlive() &&
 						!entity.isInvulnerableTo((ServerLevel) level, source)).forEach(entity -> {
-					ItemStack tempSword = new ItemStack(Items.WOODEN_SWORD, 1);
+					ItemStack tempSword = new ItemStack(Items.WOODEN_SWORD);
 					fakePlayer.setItemInHand(InteractionHand.MAIN_HAND, tempSword);
-					entity.hurt(source, entity.getMaxHealth());
+					fakePlayer.attack(entity);
 				});
-				blockEntity.storage.set(0);
 				return true;
 			}));
 		}
 	}
 
 	private boolean canKillEntities() {
-		return aabb != null && storage.getAmountAsInt() == storage.getCapacityAsLong();
+		return aabb != null && storage.getAmountAsInt() <= storage.getCapacityAsLong() && hurtsEntities();
+	}
+
+	private boolean hurtsEntities() {
+		return this.getBlockState().is(AncientRegistry.PAIN_GENERATOR.get());
 	}
 
 	@Override
@@ -80,10 +83,6 @@ public class PainGeneratorBlockEntity extends VibrationBasedBlockEntity implemen
 			return 30000;
 		else
 			return 60000;
-	}
-
-	private boolean hurtsEntities() {
-		return this.getBlockState().is(AncientRegistry.HURT_GENERATOR.get());
 	}
 
 	@Override
