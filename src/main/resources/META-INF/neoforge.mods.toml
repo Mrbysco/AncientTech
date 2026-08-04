@@ -24,3 +24,12 @@ type="required"
 versionRange="[26.1.1.0-alpha,)"
 ordering="NONE"
 side="BOTH"
+[[dependencies.ancienttech]]
+modId = "iris"
+type = "optional"
+versionRange = "[1.11.2,1.12)"
+ordering = "AFTER"
+side = "CLIENT"
+
+[[mixins]]
+config = "ancienttech.client.mixins.json"

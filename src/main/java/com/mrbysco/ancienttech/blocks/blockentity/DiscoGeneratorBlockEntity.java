@@ -1,5 +1,6 @@
 package com.mrbysco.ancienttech.blocks.blockentity;
 
+import com.mrbysco.ancienttech.client.color_drain.ColorDrainTracker;
 import com.mrbysco.ancienttech.registry.AncientBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -81,7 +82,14 @@ public class DiscoGeneratorBlockEntity extends BlockEntity implements PowerStori
 //					AncientTech.LOGGER.info("Color map {}", blockEntity.colorMap);
 //					AncientTech.LOGGER.info("Generating {} from {} colors", blockEntity.colorMap.size() * 10, blockEntity.colorMap.size());
 					try (var tx = Transaction.openRoot()) {
-						int amount = blockEntity.colorMap.size() * 10;
+						int amount = (blockEntity.colorMap.size() * 10);
+						if (blockEntity.storage.insert(amount, tx) == amount) {
+							tx.commit();
+						}
+					}
+				} else {
+					try (var tx = Transaction.openRoot()) {
+						int amount = 5;
 						if (blockEntity.storage.insert(amount, tx) == amount) {
 							tx.commit();
 						}
@@ -89,6 +97,10 @@ public class DiscoGeneratorBlockEntity extends BlockEntity implements PowerStori
 				}
 			}
 		}
+	}
+
+	public static void clientTick(Level level, BlockPos pos, BlockState state, DiscoGeneratorBlockEntity blockEntity) {
+
 	}
 
 	public int getRange() {
@@ -107,5 +119,27 @@ public class DiscoGeneratorBlockEntity extends BlockEntity implements PowerStori
 		super.saveAdditional(output);
 
 		this.storage.serialize(output.child("energy"));
+	}
+
+	@Override
+	public void onLoad() {
+		super.onLoad();
+		setActive(true);
+	}
+
+	@Override
+	public void setRemoved() {
+		super.setRemoved();
+		setActive(false);
+	}
+
+	public void setActive(boolean active) {
+		if (this.level != null && this.level.isClientSide()) {
+			if (active) {
+				ColorDrainTracker.add(this.getBlockPos());
+			} else {
+				ColorDrainTracker.remove(this.getBlockPos());
+			}
+		}
 	}
 }

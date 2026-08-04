@@ -101,6 +101,18 @@ repositories {
             includeGroup "curse.maven"
         }
     }
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        // forRepositories(fg.repository) // Uncomment when using ForgeGradle
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 dependencies {
@@ -110,6 +122,8 @@ dependencies {
     localRuntime "mezz.jei:jei-${jei_minecraft}-neoforge:${jei_version}"
 
     localRuntime "curse.maven:jade-324717:8326300"
+
+    compileOnly "maven.modrinth:iris:1.11.2+26.1-neoforge"
 }
 
 jar {

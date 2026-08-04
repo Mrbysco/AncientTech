@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.mrbysco.ancienttech.mixin.client",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "IrisRenderingPipelineMixin",
+    "ItemCutoutIrisSamplerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
